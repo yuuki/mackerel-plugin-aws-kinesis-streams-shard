@@ -5,6 +5,8 @@ before_deploy:
 - go get -u github.com/laher/goxc
 - mkdir -p $TRAVIS_BUILD_DIR/dist
 - goxc -d=$TRAVIS_BUILD_DIR/dist -bc="linux,!arm darwin" -tasks=clean-destination,xc,archive,rmbin
+script:
+- go test -v $(go list ./... | grep -v vendor)
 deploy:
   provider: releases
   skip_cleanup: true
