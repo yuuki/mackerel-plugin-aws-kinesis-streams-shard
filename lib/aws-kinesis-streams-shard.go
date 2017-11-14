@@ -17,6 +17,7 @@ import (
 
 const (
 	namespace          = "AWS/Kinesis"
+	metricsTypeSum     = "Sum"
 	metricsTypeAverage = "Average"
 	metricsTypeMaximum = "Maximum"
 	metricsTypeMinimum = "Minimum"
@@ -112,6 +113,8 @@ func (p KinesisStreamsShardPlugin) getLastPoint(metric metrics, shardID string) 
 
 		latest = dp.Timestamp
 		switch metric.Type {
+		case metricsTypeSum:
+			latestVal = *dp.Sum
 		case metricsTypeAverage:
 			latestVal = *dp.Average
 		case metricsTypeMaximum:
@@ -134,14 +137,14 @@ func (p KinesisStreamsShardPlugin) FetchMetrics() (map[string]interface{}, error
 	}
 	for _, shardID := range shardIDs {
 		for _, met := range [...]metrics{
-			{CloudWatchName: "OutgoingBytes", MackerelName: "GetRecordsBytes", Type: metricsTypeAverage, GraphdefPrefix: "bytes"},
+			{CloudWatchName: "OutgoingBytes", MackerelName: "GetRecordsBytes", Type: metricsTypeSum, GraphdefPrefix: "bytes"},
 			// Max of IteratorAgeMilliseconds is useful especially when few of iterators are in trouble
 			{CloudWatchName: "IteratorAgeMilliseconds", MackerelName: "GetRecordsDelayMaxMilliseconds", Type: metricsTypeMaximum, GraphdefPrefix: "iteratorage"},
 			{CloudWatchName: "IteratorAgeMilliseconds", MackerelName: "GetRecordsDelayMinMilliseconds", Type: metricsTypeMinimum, GraphdefPrefix: "iteratorage"},
 			{CloudWatchName: "IteratorAgeMilliseconds", MackerelName: "GetRecordsDelayAverageMilliseconds", Type: metricsTypeAverage, GraphdefPrefix: "iteratorage"},
-			{CloudWatchName: "OutgoingRecords", MackerelName: "GetRecordsRecords", Type: metricsTypeAverage, GraphdefPrefix: "records"},
-			{CloudWatchName: "IncomingBytes", MackerelName: "IncomingBytes", Type: metricsTypeAverage, GraphdefPrefix: "bytes"},
-			{CloudWatchName: "IncomingRecords", MackerelName: "IncomingRecords", Type: metricsTypeAverage, GraphdefPrefix: "records"},
+			{CloudWatchName: "OutgoingRecords", MackerelName: "GetRecordsRecords", Type: metricsTypeSum, GraphdefPrefix: "records"},
+			{CloudWatchName: "IncomingBytes", MackerelName: "IncomingBytes", Type: metricsTypeSum, GraphdefPrefix: "bytes"},
+			{CloudWatchName: "IncomingRecords", MackerelName: "IncomingRecords", Type: metricsTypeSum, GraphdefPrefix: "records"},
 			{CloudWatchName: "ReadProvidionedThroughputExceeded", MackerelName: "ReadThroughputExceeded", Type: metricsTypeAverage, GraphdefPrefix: "pending"},
 			{CloudWatchName: "WriteProvidionedThroughputExceeded", MackerelName: "WriteThroughputExceeded", Type: metricsTypeAverage, GraphdefPrefix: "pending"},
 		} {
